@@ -1,6 +1,6 @@
 import sys
-from .parser import dummy_parser_function
-from .code_writer import dummy_code_writer_function
+from .parser import parser
+from .code_writer import code_writer
 
 def main():
     if len(sys.argv) != 2:
@@ -10,9 +10,9 @@ def main():
     input_file = sys.argv[1]
     print(f"Processing file: {input_file}")
 
-    # Call dummy functions
-    print(dummy_parser_function())
-    print(dummy_code_writer_function())
+    # TODO: Implement the main logic
+    print(parser())
+    print(code_writer())
 
 if __name__ == "__main__":
     main()
