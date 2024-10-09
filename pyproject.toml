@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hack-vm-translator"
+version = "0.1"
+description = "A VM translator for the Hack computer from the Nand2Tetris course by Noam Nisan and Shimon Schocken, written in Python."
+authors = [{name = "Ash Anand", email = "cppanand@gmail.com"}]
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+    # Add any dependencies here
+]
+
+[project.scripts]
+hack-vm-translate = "src.main:main"
+
+[tool.setuptools]
+package-dir = {"src" = "src"}
+packages = ["src"]
