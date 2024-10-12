@@ -14,8 +14,8 @@ def main():
     writer = CodeWriter(input_file.removesuffix(".vm") + ".asm")
     
     while parser.has_more_commands():
-        parser.advance()
         writer.write_command(parser.current_command)
+        parser.advance()
 
     writer.close()
 

@@ -65,12 +65,13 @@ class Parser:
 
         self.file_path = file_path
         self.current_command = None
-        self.line_number = 0
 
         try:
             self.file = open(file_path, "r")
         except FileNotFoundError:
             raise FileNotFoundError(f"File not found: {file_path}")
+        
+        self.advance()
         
     def advance(self):
         line = self.file.readline()
@@ -84,9 +85,7 @@ class Parser:
         if line.startswith("//"):
             self.advance()
             return
-        
-        self.line_number += 1
-        
+                
         # Handle inline comments
         line = line.split("//")[0].strip()
         
@@ -94,7 +93,7 @@ class Parser:
         
     
     def has_more_commands(self):
-        return self.current_command is not None or self.line_number == 0
+        return self.current_command is not None
 
 def is_arithmetic_command(command: str) -> bool:
     try:
