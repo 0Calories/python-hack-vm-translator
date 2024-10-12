@@ -1,5 +1,5 @@
 import sys
-from .parser import parser
+from .parser import Parser
 from .code_writer import code_writer
 
 def main():
@@ -11,8 +11,11 @@ def main():
     print(f"Processing file: {input_file}")
 
     # TODO: Implement the main logic
-    print(parser())
-    print(code_writer())
+    parser = Parser(input_file)
+    
+    while parser.has_more_commands():
+        parser.advance()
+        print(parser.current_command)
 
 if __name__ == "__main__":
     main()
