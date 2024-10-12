@@ -60,6 +60,9 @@ class Command:
 
 class Parser:
     def __init__(self, file_path: str):
+        if not file_path.endswith(".vm"):
+            raise ValueError(f"Invalid file extension: {file_path}")
+
         self.file_path = file_path
         self.current_command = None
         self.line_number = 0
