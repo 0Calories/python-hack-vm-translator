@@ -93,6 +93,30 @@ class CodeWriter:
                 "M=M+1\n"
             ])
 
+        if command.type == CommandType.C_POP:
+            self.output_file.writelines([
+                f"// pop {command.arg1} {command.arg2}\n",
+                # Calculate the selected address
+                f"@{dest_segment}\n",
+                "D=A\n",
+                f"@{command.arg2}\n",
+                "D=D+A\n",
+                # Store the address in a temporary register
+                "@R15\n",
+                "M=D\n",
+                # Take the value addressed by the stack pointer
+                f"@{STACK_POINTER}\n",
+                "A=M\n",
+                "D=M\n",
+                # Store this value in the selected address
+                "@R15\n",
+                "A=M\n",
+                "M=D\n",
+                # Decrement the stack pointer
+                f"@{STACK_POINTER}\n",
+                "M=M-1\n"
+            ])
+
     def close(self):
         self.output_file.close()
 
