@@ -42,7 +42,13 @@ class CodeWriter:
         elif command.arg1 == ArithmeticCommand.SUB:
             self.output_file.write("// sub\n")
         elif command.arg1 == ArithmeticCommand.NEG:
-            self.output_file.write("// neg\n")
+            self.output_file.writelines([
+                "// neg\n",
+                # Get the value at the top of the stack and make it negative
+                f"@{STACK_POINTER}\n",
+                "A=M\n",
+                "M=-M\n"
+            ])
         elif command.arg1 == ArithmeticCommand.EQ:
             self.output_file.write("// eq\n")
         elif command.arg1 == ArithmeticCommand.GT:
@@ -54,7 +60,13 @@ class CodeWriter:
         elif command.arg1 == ArithmeticCommand.OR:
             self.output_file.write("// or\n")   
         elif command.arg1 == ArithmeticCommand.NOT:
-            self.output_file.write("// not\n")
+            self.output_file.writelines([
+                "// not\n",
+                # Get the value at the top of the stack and negate it
+                f"@{STACK_POINTER}\n",
+                "A=M\n",
+                "M=!M\n"
+            ])
 
     def write_push_pop(self, command: Command):
         if not command.arg1 or not command.arg2:
