@@ -1,9 +1,3 @@
 push constant 420
 push constant 69
-add
-push constant 1
-add
-push constant 10
-add
-push constant 10
-sub
+eq
