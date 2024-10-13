@@ -40,7 +40,19 @@ class CodeWriter:
                 "M=D+M\n",
             ])
         elif command.arg1 == ArithmeticCommand.SUB:
-            self.output_file.write("// sub\n")
+            self.output_file.writelines([
+                "// sub\n",
+                # Get the value at the top of the stack
+                f"@{STACK_POINTER}\n",
+                "A=M\n",
+                "D=M\n",
+                # Clear the value at the top of the stack
+                "M=0\n",
+                # Decrement the stack pointer and subtract the stored value with the current value
+                f"@{STACK_POINTER}\n",
+                "AM=M-1\n",
+                "M=D-M\n",
+            ])
         elif command.arg1 == ArithmeticCommand.NEG:
             self.output_file.writelines([
                 "// neg\n",
@@ -54,7 +66,16 @@ class CodeWriter:
         elif command.arg1 == ArithmeticCommand.GT:
             self.output_file.write("// gt\n")
         elif command.arg1 == ArithmeticCommand.LT:
-            self.output_file.write("// lt\n")
+            self.output_file.writelines([
+                "// lt\n",
+                # Get the value at the top of the stack
+                f"@{STACK_POINTER}\n",
+                "A=M\n",
+                "D=M\n",
+                # Clear the value at the top of the stack
+                "M=0\n",
+
+            ])
         elif command.arg1 == ArithmeticCommand.AND:
             self.output_file.write("// and\n")
             self.output_file.writelines([
