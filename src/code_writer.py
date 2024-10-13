@@ -62,7 +62,34 @@ class CodeWriter:
                 "M=-M\n"
             ])
         elif command.arg1 == ArithmeticCommand.EQ:
-            self.output_file.write("// eq\n")
+            self.output_file.writelines([
+                "// eq\n",
+                # Get the value at the top of the stack
+                f"@{STACK_POINTER}\n",
+                "A=M\n",
+                "D=M\n",
+                # Clear the value at the top of the stack
+                "M=0\n",
+                # Decrement the stack pointer and subtract the stored value with the current value
+                f"@{STACK_POINTER}\n",
+                "AM=M-1\n",
+                "D=M-D\n",
+                # Jump logic to set the value at the top of the stack to 1 if the result is 0
+                "@IS_EQ\n",
+                "D;JEQ\n",
+                "(NOT_EQ)\n",
+                "   @{STACK_POINTER}\n",
+                "   A=M\n",
+                "   M=0\n",
+                "   @END_EQ\n",
+                "   0;JMP\n",
+                "(IS_EQ)\n",
+                "   @{STACK_POINTER}\n",
+                "   A=M\n",
+                # -1 is the largest value in a 16-bit register so we use it to indicate true
+                "   M=-1\n",
+                "(END_EQ)\n",
+            ])
         elif command.arg1 == ArithmeticCommand.GT:
             self.output_file.write("// gt\n")
         elif command.arg1 == ArithmeticCommand.LT:
