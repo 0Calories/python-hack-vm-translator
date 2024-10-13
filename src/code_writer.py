@@ -51,7 +51,7 @@ class CodeWriter:
                 # Decrement the stack pointer and subtract the stored value with the current value
                 f"@{STACK_POINTER}\n",
                 "AM=M-1\n",
-                "M=D-M\n",
+                "M=M-D\n",
             ])
         elif command.arg1 == ArithmeticCommand.NEG:
             self.output_file.writelines([
