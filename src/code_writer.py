@@ -18,6 +18,9 @@ class CodeWriter:
         if not self.output_file:
             raise FileNotFoundError(f"Could not open output file: {output_file_path}")
         
+        # This counter is used to create unique labels for each arithmetic command
+        self.label_counter = 0
+        
     def write_command(self, command: Command):
         if command.type == CommandType.C_ARITHMETIC:
             self.write_arithmetic(command)
@@ -75,21 +78,28 @@ class CodeWriter:
                 "AM=M-1\n",
                 "D=M-D\n",
                 # Jump logic to set the value at the top of the stack to 1 if the result is 0
-                "@IS_EQ\n",
+                f"@IS_EQ_{self.label_counter}\n",
                 "D;JEQ\n",
-                "(NOT_EQ)\n",
+                f"(NOT_EQ_{self.label_counter})\n",
                 f"   @{STACK_POINTER}\n",
                 "   A=M\n",
                 "   M=0\n",
-                "   @END_EQ\n",
+                f"   @END_EQ_{self.label_counter}\n",
                 "   0;JMP\n",
-                "(IS_EQ)\n",
+                f"(IS_EQ_{self.label_counter})\n",
                 f"   @{STACK_POINTER}\n",
                 "   A=M\n",
                 # -1 is the largest value in a 16-bit register so we use it to indicate true
                 "   M=-1\n",
-                "(END_EQ)\n",
+                f"(END_EQ_{self.label_counter})\n",
+                # Decrement the stack pointer
+                f"   @{STACK_POINTER}\n",
+                "   M=M-1\n",
             ])
+
+            # Increment the label counter so the next command that involves jumping will have a unique label
+            self.label_counter += 1
+
         elif command.arg1 == ArithmeticCommand.GT:
             self.output_file.write("// gt\n")
         elif command.arg1 == ArithmeticCommand.LT:
