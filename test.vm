@@ -1,3 +1,7 @@
 push constant 420
 push constant 69
 eq
+
+push constant 420
+push constant 420
+eq

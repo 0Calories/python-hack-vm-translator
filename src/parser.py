@@ -75,12 +75,11 @@ class Parser:
         
     def advance(self):
         line = self.file.readline()
+        line = line.strip()
 
         if line == "":
             self.current_command = None
             return
-        
-        line = line.strip()
         
         if line.startswith("//"):
             self.advance()
