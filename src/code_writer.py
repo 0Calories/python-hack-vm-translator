@@ -57,8 +57,33 @@ class CodeWriter:
             self.output_file.write("// lt\n")
         elif command.arg1 == ArithmeticCommand.AND:
             self.output_file.write("// and\n")
+            self.output_file.writelines([
+                "// or\n",
+                # Get the value at the top of the stack
+                f"@{STACK_POINTER}\n",
+                "A=M\n",
+                "D=M\n",
+                # Clear the value at the top of the stack
+                "M=0\n",
+                # Decrement the stack pointer and AND the stored value with the current value
+                f"@{STACK_POINTER}\n",
+                "AM=M-1\n",
+                "M=D&M\n"
+            ])
         elif command.arg1 == ArithmeticCommand.OR:
-            self.output_file.write("// or\n")   
+            self.output_file.writelines([
+                "// or\n",
+                # Get the value at the top of the stack
+                f"@{STACK_POINTER}\n",
+                "A=M\n",
+                "D=M\n",
+                # Clear the value at the top of the stack
+                "M=0\n",
+                # Decrement the stack pointer and OR the stored value with the current value
+                f"@{STACK_POINTER}\n",
+                "AM=M-1\n",
+                "M=D|M\n"
+            ])
         elif command.arg1 == ArithmeticCommand.NOT:
             self.output_file.writelines([
                 "// not\n",
