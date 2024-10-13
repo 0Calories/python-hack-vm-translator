@@ -26,7 +26,19 @@ class CodeWriter:
 
     def write_arithmetic(self, command: Command):
         if command.arg1 == ArithmeticCommand.ADD:
-            self.output_file.write("// add\n")
+            self.output_file.writelines([
+                "// add\n",
+                # Get the value at the top of the stack
+                f"@{STACK_POINTER}\n",
+                "A=M\n",
+                "D=M\n",
+                # Clear the value at the top of the stack
+                "M=0\n",
+                # Decrement the stack pointer and add the stored value with the current value
+                f"@{STACK_POINTER}\n",
+                "AM=M-1\n",
+                "M=D+M\n",
+            ])
         elif command.arg1 == ArithmeticCommand.SUB:
             self.output_file.write("// sub\n")
         elif command.arg1 == ArithmeticCommand.NEG:
@@ -54,11 +66,15 @@ class CodeWriter:
         if command.arg1 == "constant":
             self.output_file.writelines([
                 f"// push constant {command.arg2}\n",
+                # Increment the stack pointer
+                f"@{STACK_POINTER}\n",
+                "M=M+1\n",
+                # Store the value to the top of the stack
                 f"@{command.arg2}\n",
                 "D=A\n",
                 f"@{STACK_POINTER}\n",
                 "A=M\n",
-                "M=D\n"
+                "M=D\n",
             ])
             return
         
