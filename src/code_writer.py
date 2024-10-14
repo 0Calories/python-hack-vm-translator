@@ -101,7 +101,40 @@ class CodeWriter:
             self.label_counter += 1
 
         elif command.arg1 == ArithmeticCommand.GT:
-            self.output_file.write("// gt\n")
+            self.output_file.writelines([
+                "// gt\n",
+                # Get the value at the top of the stack
+                f"@{STACK_POINTER}\n",
+                "A=M\n",
+                "D=M\n",
+                # Clear the value at the top of the stack
+                "M=0\n",
+                # Decrement the stack pointer and subtract the stored value with the current value
+                f"@{STACK_POINTER}\n",
+                "AM=M-1\n",
+                "D=M-D\n",
+                # Jump logic to set the value at the top of the stack to 1 if the result is 0
+                f"@IS_GT_{self.label_counter}\n",
+                "D;JGT\n",
+                f"(NOT_GT_{self.label_counter})\n",
+                f"   @{STACK_POINTER}\n",
+                "   A=M\n",
+                "   M=0\n",
+                f"   @END_GT_{self.label_counter}\n",
+                "   0;JMP\n",
+                f"(IS_GT_{self.label_counter})\n",
+                f"   @{STACK_POINTER}\n",
+                "   A=M\n",
+                # -1 is the largest value in a 16-bit register so we use it to indicate true
+                "   M=-1\n",
+                f"(END_GT_{self.label_counter})\n",
+                # Decrement the stack pointer
+                f"   @{STACK_POINTER}\n",
+                "   M=M-1\n",
+            ])
+
+            # Increment the label counter so the next command that involves jumping will have a unique label
+            self.label_counter += 1
         elif command.arg1 == ArithmeticCommand.LT:
             self.output_file.writelines([
                 "// lt\n",
@@ -111,12 +144,35 @@ class CodeWriter:
                 "D=M\n",
                 # Clear the value at the top of the stack
                 "M=0\n",
-
+                # Decrement the stack pointer and subtract the stored value with the current value
+                f"@{STACK_POINTER}\n",
+                "AM=M-1\n",
+                "D=M-D\n",
+                # Jump logic to set the value at the top of the stack to 1 if the result is 0
+                f"@IS_LT_{self.label_counter}\n",
+                "D;JLT\n",
+                f"(NOT_LT_{self.label_counter})\n",
+                f"   @{STACK_POINTER}\n",
+                "   A=M\n",
+                "   M=0\n",
+                f"   @END_LT_{self.label_counter}\n",
+                "   0;JMP\n",
+                f"(IS_LT_{self.label_counter})\n",
+                f"   @{STACK_POINTER}\n",
+                "   A=M\n",
+                # -1 is the largest value in a 16-bit register so we use it to indicate true
+                "   M=-1\n",
+                f"(END_LT_{self.label_counter})\n",
+                # Decrement the stack pointer
+                f"   @{STACK_POINTER}\n",
+                "   M=M-1\n",
             ])
+
+            # Increment the label counter so the next command that involves jumping will have a unique label
+            self.label_counter += 1
         elif command.arg1 == ArithmeticCommand.AND:
-            self.output_file.write("// and\n")
             self.output_file.writelines([
-                "// or\n",
+                "// and\n",
                 # Get the value at the top of the stack
                 f"@{STACK_POINTER}\n",
                 "A=M\n",
