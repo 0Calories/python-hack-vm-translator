@@ -6,7 +6,7 @@ MEMORY_SEGMENT_MAP = {
     "argument": "ARG",
     "this": "THIS",
     "that": "THAT",
-    # The below are not real memory segments but we map them here for simplicity
+    # The following do not map to real memory segments but we include them for simplicity
     "temp": "TEMP",
     "pointer": "POINTER",
     "static": "STATIC",
@@ -257,12 +257,6 @@ class CodeWriter:
                 # Increment the stack pointer
                 f"@{STACK_POINTER}\n",
                 "M=M+1\n",
-            ])
-            return
-        
-        if command.arg1 == "static":
-            self.output_file.writelines([
-                f"// push static {command.arg2}\n",
             ])
             return
         
