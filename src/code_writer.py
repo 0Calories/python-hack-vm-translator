@@ -412,6 +412,28 @@ class CodeWriter:
                 "M=D\n",
             ])
 
+    def decrement_stack_pointer(self):
+        """
+        Helper function to write the assembly code to decrement the stack pointer.
+        This simply decrements the value in the @SP register by 1 and does not store the result anywhere else.
+        """
+        self.output_file.writelines([
+            f"@{STACK_POINTER}\n",
+            "M=M-1\n"
+        ])
+
+    
+    def get_top_of_stack(self):
+        """
+        Helper function to write the assembly code to point to the value stored at the top of the stack.
+        This will decrement the value of the stack pointer and store it in the address register, since in this implementation,
+        the stack pointer always points to the next available address.
+        """
+        self.output_file.writelines([
+            f"@{STACK_POINTER}\n",
+            "AM=M-1\n",
+        ])
+
     def close(self):
         self.output_file.close()
 
