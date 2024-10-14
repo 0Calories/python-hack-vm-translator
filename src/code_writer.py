@@ -6,8 +6,10 @@ MEMORY_SEGMENT_MAP = {
     "argument": "ARG",
     "this": "THIS",
     "that": "THAT",
-    "static": "STATIC",
+    # The below are not real memory segments but we map them here for simplicity
+    "temp": "TEMP",
     "pointer": "POINTER",
+    "static": "STATIC",
 }
 
 STACK_POINTER = "SP"
@@ -34,6 +36,8 @@ class CodeWriter:
         elif command.type == CommandType.C_PUSH or command.type == CommandType.C_POP:
             self.write_push_pop(command)
 
+    # This is extremely messy and should eventually be refactored
+    # There are a lot of duplicate assembly lines that can be refactored into repeatable functions
     def write_arithmetic(self, command: Command):
         if command.arg1 == ArithmeticCommand.ADD:
             self.output_file.writelines([
@@ -303,8 +307,33 @@ class CodeWriter:
                 raise ValueError(f"Temp register address out of bounds: {command.arg2}")
             
             dest_segment = f"R{TEMP_BASE_ADDRESS + int(command.arg2)}"
-        else:
-            dest_segment = MEMORY_SEGMENT_MAP[command.arg1]
+
+            if command.type == CommandType.C_PUSH:
+                self.output_file.writelines([
+                    f"// push temp {command.arg2}\n",
+                    f"@{dest_segment}\n",
+                    "D=M\n",
+                    f"@{STACK_POINTER}\n",
+                    "A=M\n",
+                    "M=D\n",
+                    f"@{STACK_POINTER}\n",
+                    "M=M+1\n",
+                ])
+                return
+            
+            if command.type == CommandType.C_POP:
+                self.output_file.writelines([
+                    f"// pop temp {command.arg2}\n",
+                    f"@{STACK_POINTER}\n",
+                    "AM=M-1\n",
+                    "D=M\n",
+                    "M=0\n",
+                    f"@{dest_segment}\n",
+                    "M=D\n",
+                ])
+                return
+
+        dest_segment = MEMORY_SEGMENT_MAP[command.arg1]
 
 
         # Handle pointer segment
