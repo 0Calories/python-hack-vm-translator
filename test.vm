@@ -1,7 +1,10 @@
-push constant 420
 push constant 69
-eq
+push constant 420
+lt
 
 push constant 420
 push constant 420
 eq
+
+pop local 0
+pop local 1
