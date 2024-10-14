@@ -41,6 +41,9 @@ class CodeWriter:
                 f"@{STACK_POINTER}\n",
                 "AM=M-1\n",
                 "M=D+M\n",
+                # Increment the stack pointer
+                f"@{STACK_POINTER}\n",
+                "M=M+1\n",
             ])
         elif command.arg1 == ArithmeticCommand.SUB:
             self.output_file.writelines([
@@ -55,6 +58,9 @@ class CodeWriter:
                 f"@{STACK_POINTER}\n",
                 "AM=M-1\n",
                 "M=M-D\n",
+                # Increment the stack pointer
+                f"@{STACK_POINTER}\n",
+                "M=M+1\n",
             ])
         elif command.arg1 == ArithmeticCommand.NEG:
             self.output_file.writelines([
@@ -63,6 +69,9 @@ class CodeWriter:
                 f"@{STACK_POINTER}\n",
                 "AM=M-1\n",
                 "M=-M\n"
+                # Increment the stack pointer
+                f"@{STACK_POINTER}\n",
+                "M=M+1\n",
             ])
         elif command.arg1 == ArithmeticCommand.EQ:
             self.output_file.writelines([
@@ -92,6 +101,9 @@ class CodeWriter:
                 # -1 is the largest value in a 16-bit register so we use it to indicate true
                 "   M=-1\n",
                 f"(END_EQ_{self.label_counter})\n",
+                # Increment the stack pointer
+                f"@{STACK_POINTER}\n",
+                "M=M+1\n",
             ])
 
             # Increment the label counter so the next command that involves jumping will have a unique label
@@ -125,6 +137,9 @@ class CodeWriter:
                 # -1 is the largest value in a 16-bit register so we use it to indicate true
                 "   M=-1\n",
                 f"(END_GT_{self.label_counter})\n",
+                # Increment the stack pointer
+                f"@{STACK_POINTER}\n",
+                "M=M+1\n",
             ])
 
             # Increment the label counter so the next command that involves jumping will have a unique label
@@ -158,6 +173,9 @@ class CodeWriter:
                 # -1 is the largest value in a 16-bit register so we use it to indicate true
                 "   M=-1\n",
                 f"(END_LT_{self.label_counter})\n",
+                # Increment the stack pointer
+                f"@{STACK_POINTER}\n",
+                "M=M+1\n",
             ])
 
             # Increment the label counter so the next command that involves jumping will have a unique label
@@ -175,7 +193,10 @@ class CodeWriter:
                 # Decrement the stack pointer and AND the stored value with the current value
                 f"@{STACK_POINTER}\n",
                 "AM=M-1\n",
-                "M=D&M\n"
+                "M=D&M\n",
+                # Increment the stack pointer
+                f"@{STACK_POINTER}\n",
+                "M=M+1\n",
             ])
         elif command.arg1 == ArithmeticCommand.OR:
             self.output_file.writelines([
@@ -189,7 +210,10 @@ class CodeWriter:
                 # Decrement the stack pointer and OR the stored value with the current value
                 f"@{STACK_POINTER}\n",
                 "AM=M-1\n",
-                "M=D|M\n"
+                "M=D|M\n",
+                # Increment the stack pointer
+                f"@{STACK_POINTER}\n",
+                "M=M+1\n",
             ])
         elif command.arg1 == ArithmeticCommand.NOT:
             self.output_file.writelines([
@@ -197,7 +221,10 @@ class CodeWriter:
                 # Get the value at the top of the stack and negate it
                 f"@{STACK_POINTER}\n",
                 "AM=M-1\n",
-                "M=!M\n"
+                "M=!M\n",
+                # Increment the stack pointer
+                f"@{STACK_POINTER}\n",
+                "M=M+1\n",
             ])
 
     def write_push_pop(self, command: Command):
