@@ -1,13 +1,18 @@
-from .parser import Command, CommandType, ArithmeticCommand
+import os
+from .parser import Command, CommandType, ArithmeticCommand 
 
 MEMORY_SEGMENT_MAP = {
     "local": "LCL",
     "argument": "ARG",
     "this": "THIS",
-    "that": "THAT"
+    "that": "THAT",
+    "static": "STATIC",
+    "pointer": "POINTER",
 }
 
 STACK_POINTER = "SP"
+
+TEMP_BASE_ADDRESS = 5
 
 class CodeWriter:
     def __init__(self, output_file_path: str):
@@ -18,6 +23,8 @@ class CodeWriter:
         if not self.output_file:
             raise FileNotFoundError(f"Could not open output file: {output_file_path}")
         
+        self.filename = os.path.basename(output_file_path).split(".")[0]
+
         # This counter is used to create unique labels for each arithmetic command
         self.label_counter = 0
         
@@ -257,15 +264,93 @@ class CodeWriter:
         
         if command.arg1 not in MEMORY_SEGMENT_MAP:
             raise ValueError(f"Invalid memory segment: {command.arg1}")
-        
-        dest_segment = MEMORY_SEGMENT_MAP[command.arg1]
+
+        # Handle static segment
+        if command.arg1 == "static":
+            dest_address = f"{self.filename}.{command.arg2}"
+
+            if command.type == CommandType.C_PUSH:
+                self.output_file.writelines([
+                    f"// push static {command.arg2}\n",
+                    f"@{dest_address}\n",
+                    "D=M\n",
+                    f"@{STACK_POINTER}\n",
+                    "A=M\n",
+                    "M=D\n",
+                    f"@{STACK_POINTER}\n",
+                    "M=M+1\n",
+                ])
+                return
+            
+            if command.type == CommandType.C_POP:
+                self.output_file.writelines([
+                    f"// pop static {command.arg2}\n",
+                    # Set the address to the top of the stack
+                    f"@{STACK_POINTER}\n",
+                    "AM=M-1\n",
+                    "D=M\n",
+                    # Clear the value at the top of the stack
+                    "M=0\n",
+                    # Store the value in the given static register
+                    f"@{dest_address}\n",
+                    "M=D\n",
+                ])
+                return
+
+        # Handle temp segment
+        if command.arg1 == "temp":
+            if int(command.arg2) > 7:
+                raise ValueError(f"Temp register address out of bounds: {command.arg2}")
+            
+            dest_segment = f"R{TEMP_BASE_ADDRESS + int(command.arg2)}"
+        else:
+            dest_segment = MEMORY_SEGMENT_MAP[command.arg1]
+
+
+        # Handle pointer segment
+        if command.arg1 == "pointer":
+            if int(command.arg2) not in (0, 1):
+                raise ValueError(f"Pointer values can only be 0 or 1")
+            
+            dest_segment = "THIS" if int(command.arg2) == 0 else "THAT"
+
+            if command.type == CommandType.C_PUSH:
+                self.output_file.writelines([
+                    f"// push {command.arg1} {command.arg2}\n",
+                    f"@{dest_segment}\n",
+                    "A=M\n",
+                    "D=M\n",
+                    f"@{STACK_POINTER}\n",
+                    "A=M\n",
+                    "M=D\n",
+                    f"@{STACK_POINTER}\n",
+                    "M=M+1\n",
+                ])
+                return
+            
+            if command.type == CommandType.C_POP:
+                self.output_file.writelines([
+                    f"// pop {command.arg1} {command.arg2}\n",
+                    # Set the address to the top of the stack
+                    f"@{STACK_POINTER}\n",
+                    "AM=M-1\n",
+                    "D=M\n",
+                    # Clear the value at the top of the stack
+                    "M=0\n",
+                    # Store the value in the given pointer register
+                    f"@{dest_segment}\n",
+                    "A=M\n",
+                    "M=D\n"
+                ])
+                return
+
 
         if command.type == CommandType.C_PUSH:
             self.output_file.writelines([
                 f"// push {command.arg1} {command.arg2}\n",
                 # Take the address of the segment
                 f"@{dest_segment}\n",
-                "D=A\n",
+                "D=M\n",
                 # Increment the address by the offset
                 f"@{command.arg2}\n",
                 f"D=D+A\n",
@@ -288,7 +373,7 @@ class CodeWriter:
                 "M=M-1\n"
                 # Calculate the selected address
                 f"@{dest_segment}\n",
-                "D=A\n",
+                "D=M\n",
                 f"@{command.arg2}\n",
                 "D=D+A\n",
                 # Store the address in a temporary register
