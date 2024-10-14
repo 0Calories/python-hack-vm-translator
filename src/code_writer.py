@@ -33,7 +33,7 @@ class CodeWriter:
                 "// add\n",
                 # Get the value at the top of the stack
                 f"@{STACK_POINTER}\n",
-                "A=M\n",
+                "AM=M-1\n",
                 "D=M\n",
                 # Clear the value at the top of the stack
                 "M=0\n",
@@ -47,7 +47,7 @@ class CodeWriter:
                 "// sub\n",
                 # Get the value at the top of the stack
                 f"@{STACK_POINTER}\n",
-                "A=M\n",
+                "AM=M-1\n",
                 "D=M\n",
                 # Clear the value at the top of the stack
                 "M=0\n",
@@ -61,7 +61,7 @@ class CodeWriter:
                 "// neg\n",
                 # Get the value at the top of the stack and make it negative
                 f"@{STACK_POINTER}\n",
-                "A=M\n",
+                "AM=M-1\n",
                 "M=-M\n"
             ])
         elif command.arg1 == ArithmeticCommand.EQ:
@@ -69,7 +69,7 @@ class CodeWriter:
                 "// eq\n",
                 # Get the value at the top of the stack
                 f"@{STACK_POINTER}\n",
-                "A=M\n",
+                "AM=M-1\n",
                 "D=M\n",
                 # Clear the value at the top of the stack
                 "M=0\n",
@@ -102,7 +102,7 @@ class CodeWriter:
                 "// gt\n",
                 # Get the value at the top of the stack
                 f"@{STACK_POINTER}\n",
-                "A=M\n",
+                "AM=M-1\n",
                 "D=M\n",
                 # Clear the value at the top of the stack
                 "M=0\n",
@@ -135,7 +135,7 @@ class CodeWriter:
                 "// lt\n",
                 # Get the value at the top of the stack
                 f"@{STACK_POINTER}\n",
-                "A=M\n",
+                "AM=M-1\n",
                 "D=M\n",
                 # Clear the value at the top of the stack
                 "M=0\n",
@@ -168,7 +168,7 @@ class CodeWriter:
                 "// and\n",
                 # Get the value at the top of the stack
                 f"@{STACK_POINTER}\n",
-                "A=M\n",
+                "AM=M-1\n",
                 "D=M\n",
                 # Clear the value at the top of the stack
                 "M=0\n",
@@ -182,7 +182,7 @@ class CodeWriter:
                 "// or\n",
                 # Get the value at the top of the stack
                 f"@{STACK_POINTER}\n",
-                "A=M\n",
+                "AM=M-1\n",
                 "D=M\n",
                 # Clear the value at the top of the stack
                 "M=0\n",
@@ -196,7 +196,7 @@ class CodeWriter:
                 "// not\n",
                 # Get the value at the top of the stack and negate it
                 f"@{STACK_POINTER}\n",
-                "A=M\n",
+                "AM=M-1\n",
                 "M=!M\n"
             ])
 
@@ -210,15 +210,15 @@ class CodeWriter:
         if command.arg1 == "constant":
             self.output_file.writelines([
                 f"// push constant {command.arg2}\n",
-                # Increment the stack pointer
-                f"@{STACK_POINTER}\n",
-                "M=M+1\n",
                 # Store the value to the top of the stack
                 f"@{command.arg2}\n",
                 "D=A\n",
                 f"@{STACK_POINTER}\n",
                 "A=M\n",
                 "M=D\n",
+                # Increment the stack pointer
+                f"@{STACK_POINTER}\n",
+                "M=M+1\n",
             ])
             return
         
@@ -256,6 +256,9 @@ class CodeWriter:
         if command.type == CommandType.C_POP:
             self.output_file.writelines([
                 f"// pop {command.arg1} {command.arg2}\n",
+                # Decrement the stack pointer
+                f"@{STACK_POINTER}\n",
+                "M=M-1\n"
                 # Calculate the selected address
                 f"@{dest_segment}\n",
                 "D=A\n",
@@ -274,9 +277,6 @@ class CodeWriter:
                 "@R15\n",
                 "A=M\n",
                 "M=D\n",
-                # Decrement the stack pointer
-                f"@{STACK_POINTER}\n",
-                "M=M-1\n"
             ])
 
     def close(self):
