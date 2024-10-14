@@ -341,7 +341,6 @@ class CodeWriter:
                 self.output_file.writelines([
                     f"// push {command.arg1} {command.arg2}\n",
                     f"@{dest_segment}\n",
-                    "A=M\n",
                     "D=M\n",
                     f"@{STACK_POINTER}\n",
                     "A=M\n",
@@ -360,14 +359,13 @@ class CodeWriter:
                     "D=M\n",
                     # Clear the value at the top of the stack
                     "M=0\n",
-                    # Store the value in the given pointer register
+                    # Store the value in THIS or THAT
                     f"@{dest_segment}\n",
-                    "A=M\n",
                     "M=D\n"
                 ])
                 return
 
-
+        # Handle LOCAL, ARGUMENT, THIS, THAT
         if command.type == CommandType.C_PUSH:
             self.output_file.writelines([
                 f"// push {command.arg1} {command.arg2}\n",
