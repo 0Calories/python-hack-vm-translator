@@ -222,15 +222,8 @@ class CodeWriter:
         if command.arg1 == "constant":
             self.output_file.writelines([
                 f"// push constant {command.arg2}\n",
-                # Store the value to the top of the stack
-                f"@{command.arg2}\n",
-                "D=A\n",
-                f"@{STACK_POINTER}\n",
-                "A=M\n",
-                "M=D\n",
-                # Increment the stack pointer
-                f"@{STACK_POINTER}\n",
-                "M=M+1\n",
+                *self.push_to_stack(command.arg2),
+                *self.increment_stack_pointer()
             ])
             return
         
@@ -257,13 +250,7 @@ class CodeWriter:
             if command.type == CommandType.C_POP:
                 self.output_file.writelines([
                     f"// pop static {command.arg2}\n",
-                    # Set the address to the top of the stack
-                    f"@{STACK_POINTER}\n",
-                    "AM=M-1\n",
-                    "D=M\n",
-                    # Clear the value at the top of the stack
-                    "M=0\n",
-                    # Store the value in the given static register
+                    *self.pop_from_stack(),
                     f"@{dest_address}\n",
                     "M=D\n",
                 ])
@@ -445,6 +432,28 @@ class CodeWriter:
             "AM=M-1\n",
             "D=M\n",
             "M=0\n",
+        ]
+    
+    def push_to_stack(self, value: str):
+        """
+        Helper function that returns the instructions to push a value to the stack.
+
+        This will do the following:
+            - `@value`
+            - `D=A`
+            - `@SP`
+            - `A=M`
+            - `M=D`
+
+        Args:
+            value (str): The value to push to the stack.
+        """
+        return [
+            f"@{value}\n",
+            "D=A\n",
+            f"@{STACK_POINTER}\n",
+            "A=M\n",
+            "M=D\n",
         ]
     
 
