@@ -58,13 +58,9 @@ class CodeWriter:
         elif command.arg1 == ArithmeticCommand.NEG:
             self.output_file.writelines([
                 "// neg\n",
-                # Get the value at the top of the stack and make it negative
-                f"@{STACK_POINTER}\n",
-                "AM=M-1\n",
-                "M=-M\n"
-                # Increment the stack pointer
-                f"@{STACK_POINTER}\n",
-                "M=M+1\n",
+                *self.point_to_top_of_stack(),
+                "M=-M\n",
+                *self.increment_stack_pointer()
             ])
         elif command.arg1 == ArithmeticCommand.EQ:
             self.output_file.writelines([
@@ -211,13 +207,9 @@ class CodeWriter:
         elif command.arg1 == ArithmeticCommand.NOT:
             self.output_file.writelines([
                 "// not\n",
-                # Get the value at the top of the stack and negate it
-                f"@{STACK_POINTER}\n",
-                "AM=M-1\n",
-                "M=!M\n",
-                # Increment the stack pointer
-                f"@{STACK_POINTER}\n",
-                "M=M+1\n",
+                *self.point_to_top_of_stack(),
+                "M=!M\n",   
+                *self.increment_stack_pointer()
             ])
 
     def write_push_pop(self, command: Command):
