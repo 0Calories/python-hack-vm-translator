@@ -42,36 +42,18 @@ class CodeWriter:
         if command.arg1 == ArithmeticCommand.ADD:
             self.output_file.writelines([
                 "// add\n",
-                # Get the value at the top of the stack
-                f"@{STACK_POINTER}\n",
-                "AM=M-1\n",
-                "D=M\n",
-                # Clear the value at the top of the stack
-                "M=0\n",
-                # Decrement the stack pointer and add the stored value with the current value
-                f"@{STACK_POINTER}\n",
-                "AM=M-1\n",
+                *self.pop_from_stack(),
+                *self.point_to_top_of_stack(),
                 "M=D+M\n",
-                # Increment the stack pointer
-                f"@{STACK_POINTER}\n",
-                "M=M+1\n",
+                *self.increment_stack_pointer()
             ])
         elif command.arg1 == ArithmeticCommand.SUB:
             self.output_file.writelines([
                 "// sub\n",
-                # Get the value at the top of the stack
-                f"@{STACK_POINTER}\n",
-                "AM=M-1\n",
-                "D=M\n",
-                # Clear the value at the top of the stack
-                "M=0\n",
-                # Decrement the stack pointer and subtract the stored value with the current value
-                f"@{STACK_POINTER}\n",
-                "AM=M-1\n",
+                *self.pop_from_stack(),
+                *self.point_to_top_of_stack(),
                 "M=M-D\n",
-                # Increment the stack pointer
-                f"@{STACK_POINTER}\n",
-                "M=M+1\n",
+                *self.increment_stack_pointer()
             ])
         elif command.arg1 == ArithmeticCommand.NEG:
             self.output_file.writelines([
@@ -414,25 +396,65 @@ class CodeWriter:
 
     def decrement_stack_pointer(self):
         """
-        Helper function to write the assembly code to decrement the stack pointer.
+        Helper function that returns the instructions to decrement the stack pointer.
         This simply decrements the value in the @SP register by 1 and does not store the result anywhere else.
+
+        This will do the following:
+            - `@SP`
+            - `M=M-1`
         """
-        self.output_file.writelines([
+        return [
             f"@{STACK_POINTER}\n",
             "M=M-1\n"
-        ])
-
+        ]
     
-    def get_top_of_stack(self):
+    def increment_stack_pointer(self):
         """
-        Helper function to write the assembly code to point to the value stored at the top of the stack.
+        Helper function that returns the instructions to increment the stack pointer.
+        This simply increments the value in the @SP register by 1 and does not store the result anywhere else.
+
+        This will do the following:
+            - `@SP`
+            - `M=M+1`
+        """
+        return [
+            f"@{STACK_POINTER}\n",
+            "M=M+1\n"
+        ]
+
+    def point_to_top_of_stack(self):
+        """
+        Helper function that returns the instructions to point to the value stored at the top of the stack.
         This will decrement the value of the stack pointer and store it in the address register, since in this implementation,
-        the stack pointer always points to the next available address.
+        the stack pointer always points to the next available slot rather than the value at the top of the stack.
+
+        This will do the following:
+            - `@SP`
+            - `AM=M-1`
         """
-        self.output_file.writelines([
+        return [
             f"@{STACK_POINTER}\n",
             "AM=M-1\n",
-        ])
+        ]
+    
+    def pop_from_stack(self):
+        """
+        Helper function that returns the instructions to pop the value at the top of the stack and store
+        the result in the D register.
+
+        This will do the following:
+            - `@SP`
+            - `AM=M-1`
+            - `D=M`
+            - `M=0`
+        """
+        return [
+            f"@{STACK_POINTER}\n",
+            "AM=M-1\n",
+            "D=M\n",
+            "M=0\n",
+        ]
+    
 
     def close(self):
         self.output_file.close()
